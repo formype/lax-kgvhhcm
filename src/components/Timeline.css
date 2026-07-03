@@ -174,10 +174,16 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .timeline-item::before {
+  .timeline-item.left::before,
+  .timeline-item.right::before,
+  .timeline-item.center::before {
     left: 31px;
     right: auto;
     margin-left: -2px;
+  }
+  
+  .timeline-item.center::before {
+    height: 90px;
   }
   
   .timeline-item {
@@ -191,8 +197,13 @@
   }
   
   .timeline-item.left::after, 
-  .timeline-item.right::after,
+  .timeline-item.right::after {
+    left: 21px;
+    margin-left: 0;
+  }
+
   .timeline-item.center::after {
+    display: block;
     left: 21px;
     margin-left: 0;
   }
