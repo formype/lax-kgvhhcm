@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Quote } from 'lucide-react';
+import Guestbook from './Guestbook';
 import './Gallery.css';
 
 const quotes = [
@@ -71,6 +72,8 @@ const Gallery = () => {
           </div>
         </div>
       </section>
+
+      <Guestbook />
 
       {/* Gallery Section */}
       <section id="gallery" className="section gallery-section">
