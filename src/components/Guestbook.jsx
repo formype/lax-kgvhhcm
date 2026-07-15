@@ -71,7 +71,7 @@ function Guestbook() {
     setIsSubmitting(false);
 
     if (error) {
-      setError('Đã có lỗi xảy ra. Vui lòng thử lại sau.');
+      setError('Lỗi hệ thống: ' + error.message);
       console.error(error);
     } else {
       setSubmitSuccess(true);
