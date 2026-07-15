@@ -174,10 +174,22 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .timeline-year {
+    font-size: 1.8rem;
+  }
+  .timeline-title {
+    font-size: 1.1rem;
+  }
+  .timeline-desc {
+    font-size: 0.95rem;
+  }
+  .timeline-content {
+    padding: 20px;
+  }
   .timeline-item.left::before,
   .timeline-item.right::before,
   .timeline-item.center::before {
-    left: 31px;
+    left: 20px;
     right: auto;
     margin-left: -2px;
   }
@@ -188,7 +200,7 @@
   
   .timeline-item {
     width: 100%;
-    padding-left: 70px;
+    padding-left: 50px;
     padding-right: 0;
   }
   
@@ -198,20 +210,20 @@
   
   .timeline-item.left::after, 
   .timeline-item.right::after {
-    left: 21px;
+    left: 10px;
     margin-left: 0;
   }
 
   .timeline-item.center::after {
     display: block;
-    left: 21px;
+    left: 10px;
     margin-left: 0;
   }
   
   .timeline-item.left .timeline-icon,
   .timeline-item.right .timeline-icon,
   .timeline-item.center .timeline-icon {
-    left: 30px;
+    left: 15px;
     right: auto;
     margin-left: 0;
   }

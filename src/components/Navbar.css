@@ -122,6 +122,13 @@
 }
 
 @media (max-width: 768px) {
+  .logo {
+    font-size: 1.1rem;
+  }
+  .school-logo-img {
+    width: 30px;
+    height: 30px;
+  }
   .nav-links {
     display: none;
   }

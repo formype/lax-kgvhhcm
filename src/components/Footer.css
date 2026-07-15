@@ -78,6 +78,18 @@
 }
 
 @media (max-width: 768px) {
+  .footer-logo h3 {
+    font-size: 1.2rem;
+  }
+  .footer-school-name {
+    font-size: 1rem;
+  }
+  .footer-links h4, .footer-info h4 {
+    font-size: 0.95rem;
+  }
+  .footer-info p, .footer-links a {
+    font-size: 0.85rem;
+  }
   .footer-content {
     grid-template-columns: 1fr;
     text-align: center;
