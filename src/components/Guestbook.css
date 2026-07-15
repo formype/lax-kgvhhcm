@@ -21,7 +21,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 40px;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .guestbook-form-card {
@@ -138,7 +138,7 @@
   border-radius: 12px;
   padding: 30px;
   height: 100%;
-  max-height: 600px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -182,9 +182,9 @@
 .reflection-card {
   background: rgba(255, 255, 255, 0.03);
   border-left: 3px solid var(--primary-red);
-  padding: 20px;
+  padding: 15px;
   border-radius: 0 8px 8px 0;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   transition: var(--transition-fast);
 }
 
@@ -202,11 +202,11 @@
 .reflection-author strong {
   color: var(--accent-gold);
   display: block;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .reflection-class {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.1);
   padding: 2px 8px;
@@ -216,14 +216,14 @@
 }
 
 .reflection-date {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
 }
 
 .reflection-body {
   color: #ddd;
-  line-height: 1.6;
-  font-size: 0.95rem;
+  line-height: 1.5;
+  font-size: 0.85rem;
 }
 
 .reflection-body p {
