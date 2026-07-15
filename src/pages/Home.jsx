@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import Timeline from '../components/Timeline';
 import Gallery from '../components/Gallery';
+import References from '../components/References';
 import Footer from '../components/Footer';
 
 function Home() {
@@ -20,6 +21,7 @@ function Home() {
         <Hero />
         <Timeline />
         <Gallery />
+        <References />
       </main>
       <Footer />
     </div>

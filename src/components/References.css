@@ -1,0 +1,95 @@
+.references-section {
+  padding: 60px 5% 100px;
+  position: relative;
+  background: transparent;
+}
+
+.references-list {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.reference-item {
+  display: flex;
+  align-items: center;
+  padding: 20px 25px;
+  background: rgba(20, 20, 20, 0.6);
+  border: 1px solid rgba(255, 193, 7, 0.15);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  group: hover;
+}
+
+.reference-item:hover {
+  background: rgba(255, 193, 7, 0.1);
+  border-color: rgba(255, 193, 7, 0.4);
+  transform: translateX(10px);
+}
+
+.ref-icon {
+  color: var(--accent-gold);
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ref-content {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.ref-number {
+  color: var(--primary-red);
+  font-weight: bold;
+  font-size: 1.2rem;
+  font-family: var(--font-serif);
+}
+
+.ref-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.reference-item:hover .ref-title {
+  color: var(--accent-gold);
+}
+
+.ref-link-icon {
+  color: var(--text-secondary);
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.reference-item:hover .ref-link-icon {
+  opacity: 1;
+  color: var(--accent-gold);
+  transform: translate(3px, -3px);
+}
+
+@media (max-width: 768px) {
+  .reference-item {
+    padding: 15px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .ref-icon {
+    display: none;
+  }
+  
+  .ref-link-icon {
+    align-self: flex-end;
+  }
+}
