@@ -18,7 +18,7 @@ const timelineData = [
   },
   {
     year: '1920',
-    title: 'Sáng lập Đảng Cộng sản Pháp',
+    title: 'Tham gia sáng lập Đảng Cộng sản Pháp',
     desc: 'Năm 1919, lấy tên là Nguyễn Ái Quốc, thay mặt những người Việt Nam yêu nước tại Pháp, Hồ Chí Minh đã gửi tới Hội nghị Versailles bản yêu sách đòi quyền tự do cho nhân dân Việt Nam.\nDưới ảnh hưởng của Cách mạng Tháng Mười Nga năm 1917 và Luận cương của Lênin, tháng 12/1920, Nguyễn Ái Quốc tham dự Đại hội lần thứ XVIII Đảng Xã hội Pháp và bỏ phiếu tán thành Đảng gia nhập Quốc tế III (Quốc tế Cộng sản), trở thành một trong những người sáng lập Đảng Cộng sản Pháp.\nTừ một người yêu nước trở thành một người cộng sản, Hồ Chí Minh khẳng định: "Muốn cứu nước và giải phóng dân tộc, không có con đường nào khác con đường cách mạng vô sản".',
     icon: <Globe />
   },
@@ -31,7 +31,7 @@ const timelineData = [
   {
     year: '1941',
     title: 'Về nước lãnh đạo cách mạng',
-    desc: 'Từ năm 1934 đến năm 1938, Nguyễn Ái Quốc nghiên cứu tại Viện Nghiên cứu các vấn đề dân tộc thuộc địa tại Mátxcơva (Liên Xô). Kiên trì con đường đã xác định cho cách mạng Việt Nam, Người tiếp tục theo dõi, chỉ đạo phong trào cách mạng trong nước.\nTháng 10/1938, Người rời Liên Xô sang Trung Quốc, bắt liên lạc với tổ chức Đảng chuẩn bị về nước.\nNgày 28/1/1941, Nguyễn Ái Quốc về nước sau hơn 30 năm xa Tổ quốc. Tháng 5/1941, Người triệu tập Hội nghị lần thứ 8 Ban Chấp hành Trung ương Đảng, quyết định đường lối đánh đuổi Pháp, Nhật, thành lập Mặt trận Việt Minh, trực tiếp lãnh đạo phong trào cách mạng giải phóng dân tộc.',
+    desc: 'Từ năm 1934 đến năm 1938, Nguyễn Ái Quốc nghiên cứu tại Viện Nghiên cứu các vấn đề dân tộc thuộc địa tại Mátxcơva (Liên Xô). Kiên trì con đường đã xác định cho cách mạng Việt Nam, Người tiếp tục theo dõi, chỉ đạo phong trào cách mạng trong nước.\nTháng 10/1938, Người rời Liên Xô sang Trung Quốc, bắt liên lạc với tổ chức Đảng chuẩn bị về nước.\nNgày 28/1/1941, Nguyễn Ái Quốc về nước sau hơn 30 năm xa Tổ Quốc, Người đã sống và làm việc tại Pác Bó, tỉnh Cao Bằng. Tháng 5/1941, Người triệu tập Hội nghị lần thứ 8 Ban Chấp hành Trung ương Đảng, quyết định đường lối đánh đuổi Pháp, Nhật, thành lập Mặt trận Việt Minh, trực tiếp lãnh đạo phong trào cách mạng giải phóng dân tộc.',
     icon: <MapPin />
   },
   {
@@ -43,7 +43,7 @@ const timelineData = [
   {
     year: '1944',
     title: 'Thành lập Đội Việt Nam Tuyên truyền Giải phóng quân',
-    desc: 'Tháng 9/1944, Hồ Chí Minh được trả tự do và trở về căn cứ cách mạng Cao Bằng.\nĐến tháng 12/1944, nhận thấy thời cơ cách mạng đang đến gần, Hồ Chí Minh đã ra chỉ thị thành lập Đội Việt Nam Tuyên truyền Giải phóng quân (tiền thân của Quân đội nhân dân Việt Nam anh hùng ngày nay). Đội quân này dưới sự chỉ huy của Đại tướng Võ Nguyên Giáp đã đóng vai trò nòng cốt, tạo đà cho các cuộc khởi nghĩa vũ trang sau đó.',
+    desc: 'Tháng 9/1944, Hồ Chí Minh được trả tự do và trở về căn cứ cách mạng Cao Bằng.\nĐến ngày 22/12/1944, nhận thấy thời cơ cách mạng đang đến gần, Hồ Chí Minh đã ra chỉ thị thành lập Đội Việt Nam Tuyên truyền Giải phóng quân (tiền thân của Quân đội nhân dân Việt Nam anh hùng ngày nay). Đội quân này dưới sự chỉ huy của Đại tướng Võ Nguyên Giáp đã đóng vai trò nòng cốt, tạo đà cho các cuộc khởi nghĩa vũ trang sau đó.',
     icon: <Shield />
   },
   {
