@@ -5,12 +5,12 @@ import './References.css';
 
 const references = [
   {
-    title: "Hồ Chí Minh Toàn tập (Tải file PDF), NXB Chính trị quốc gia Sự thật.",
-    link: "https://www.google.com/search?q=%22H%E1%BB%93+Ch%C3%AD+Minh+to%C3%A0n+t%E1%BA%ADp%22+filetype%3Apdf"
+    title: "Hồ Chí Minh Toàn tập, NXB Chính trị quốc gia Sự thật.",
+    link: "https://stbook.vn/home_product/home_topic_item/30?topic=S%C3%A1ch%20c%E1%BB%A7a%20Ch%E1%BB%A7%20t%E1%BB%8Bch%20H%E1%BB%93%20Ch%C3%AD%20Minh"
   },
   {
-    title: "Hồ Chí Minh - Biên niên tiểu sử (Tải file PDF), NXB Chính trị quốc gia Sự thật.",
-    link: "https://www.google.com/search?q=%22H%E1%BB%93+Ch%C3%AD+Minh+Bi%C3%AAn+ni%C3%AAn+ti%E1%BB%83u+s%E1%BB%AD%22+filetype%3Apdf"
+    title: "Hồ Chí Minh - Biên niên tiểu sử, NXB Chính trị quốc gia Sự thật.",
+    link: "https://hochiminh.vn/cuoc-doi-su-nghiep/bien-nien-tieu-su-ho-chi-minh"
   },
   {
     title: "SGK Lịch sử và Địa lí 8, 9 (Chương trình GDPT 2018), NXB Giáo dục Việt Nam.",
