@@ -93,7 +93,7 @@ const Timeline = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          Tiểu sử về Chủ tịch Hồ Chí Minh
+          Tiểu sử về Chủ tịch <br /> Hồ Chí Minh
         </motion.h2>
 
         <div className="timeline-container">
