@@ -66,12 +66,14 @@
 /* Admin Dashboard */
 .admin-dashboard {
   min-height: 100vh;
-  background: #0f0f0f;
+  background: transparent;
   color: white;
 }
 
 .admin-header {
-  background: #1a1a1a;
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: 15px 5%;
   display: flex;
