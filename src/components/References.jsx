@@ -6,15 +6,15 @@ import './References.css';
 const references = [
   {
     title: "Hồ Chí Minh Toàn tập, NXB Chính trị quốc gia Sự thật.",
-    link: "https://hochiminh.vn/tac-pham-cua-chu-tich-ho-chi-minh-20150"
+    link: "https://stbook.vn/"
   },
   {
     title: "Hồ Chí Minh - Biên niên tiểu sử, NXB Chính trị quốc gia Sự thật.",
-    link: "https://hochiminh.vn/tieu-su-chu-tich-ho-chi-minh-20149"
+    link: "https://nxbchinhtriquocgia.vn/"
   },
   {
     title: "SGK Lịch sử và Địa lí 8, 9 (Chương trình GDPT 2018), NXB Giáo dục Việt Nam.",
-    link: "https://hanhtrangso.nxbgd.vn/sach-dien-tu"
+    link: "https://taphuan.nxbgd.vn/"
   },
   {
     title: "Bảo tàng Hồ Chí Minh - Thư viện tài liệu",
