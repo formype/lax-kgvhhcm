@@ -118,7 +118,7 @@ function Guestbook() {
                     name="name" 
                     value={formData.name} 
                     onChange={handleChange} 
-                    placeholder="Ngập nhập họ tên của bạn..." 
+                    placeholder="Hãy nhập họ và tên của bạn..." 
                     required 
                   />
                 </div>
@@ -131,7 +131,7 @@ function Guestbook() {
                     name="className" 
                     value={formData.className} 
                     onChange={handleChange} 
-                    placeholder="VD: 9A1 (Dành cho HS THCS Lê Anh Xuân)" 
+                    placeholder="VD: 9/1 (Dành cho học sinh trường THCS Lê Anh Xuân)" 
                   />
                 </div>
 
