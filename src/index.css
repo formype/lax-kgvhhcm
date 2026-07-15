@@ -213,18 +213,20 @@ img {
   }
 }
 
-.glass, 
+.glass:not(.timeline-content), 
 .guestbook-form-card, 
 .reflection-card, 
+.reflections-list,
 .admin-card,
 .admin-login-box {
   position: relative;
   border-color: transparent !important;
 }
 
-.glass::after, 
+.glass:not(.timeline-content)::after, 
 .guestbook-form-card::after, 
 .reflection-card::after, 
+.reflections-list::after,
 .admin-card::after,
 .admin-login-box::after {
   content: '';
