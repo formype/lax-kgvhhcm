@@ -14,7 +14,7 @@ const references = [
   },
   {
     title: "SGK Lịch sử và Địa lí 8, 9 (Chương trình GDPT 2018), NXB Giáo dục Việt Nam.",
-    link: "https://taphuan.nxbgd.vn/"
+    link: "https://taphuan.nxbgd.vn/tap-huan/doc-sach/sgk-lich-su-dia-li-8.4830375637#page=0"
   },
   {
     title: "Bảo tàng Hồ Chí Minh - Thư viện tài liệu",
