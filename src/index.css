@@ -198,6 +198,14 @@ img {
   .section-title {
     font-size: 2rem;
   }
+  
+  .mobile-break {
+    display: block;
+  }
+}
+
+.mobile-break {
+  display: none;
 }
 
 /* RGB LED Border Effect for all cards and frames */
