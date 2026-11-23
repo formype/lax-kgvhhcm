@@ -1,5 +1,7 @@
 .footer {
-  background: linear-gradient(180deg, #0c0304 0%, #050102 100%);
+  background: linear-gradient(180deg, rgba(48, 14, 17, 0.68) 0%, rgba(28, 8, 10, 0.82) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 40px 0 20px;
   border-top: 1px solid rgba(212, 175, 55, 0.32);
 }

@@ -59,10 +59,8 @@
   line-height: 1.85;
   margin: 0 auto 2.75rem;
   max-width: 760px;
-  padding: 22px 28px;
-  background: rgba(20, 6, 7, 0.55);
-  border-top: 1px solid rgba(212, 175, 55, 0.35);
-  border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+  padding: 8px 20px;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.65);
 }
 
 .hero-actions {
