@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { BookOpen, Ship, Flag, Star, ChevronDown, ChevronUp, Globe, MapPin, FileText, Shield, Swords, Heart, Award } from 'lucide-react';
+import Tilt3DCard from './Tilt3DCard';
 import './Timeline.css';
 
 const timelineData = [
@@ -106,40 +107,42 @@ const Timeline = () => {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6, delay: index * 0.2 }}
             >
-              <motion.div 
-                layout
-                className="timeline-content glass"
-                onClick={() => toggleExpand(index)}
-                style={{ cursor: 'pointer' }}
-              >
-                <motion.div layout className="timeline-icon">
-                  {item.icon}
+              <Tilt3DCard maxTilt={5} scale={1.015}>
+                <motion.div 
+                  layout
+                  className="timeline-content glass"
+                  onClick={() => toggleExpand(index)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <motion.div layout className="timeline-icon" style={{ transform: 'translateZ(20px)' }}>
+                    {item.icon}
+                  </motion.div>
+                  {item.year && <motion.h3 layout className="timeline-year text-gold">{item.year}</motion.h3>}
+                  {item.title && <motion.h4 layout className="timeline-title">{item.title}</motion.h4>}
+                  <motion.div layout className="timeline-desc">
+                    <div className={expanded[index] ? '' : 'line-clamp-4'}>
+                      {item.desc}
+                    </div>
+                    {item.desc.length > 200 && (
+                      <motion.div 
+                        layout
+                        className="text-gold" 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '5px',
+                          fontSize: '0.85rem', 
+                          marginTop: '15px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        {expanded[index] ? 'Thu gọn' : 'Xem thêm'}
+                        {expanded[index] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </motion.div>
+                    )}
+                  </motion.div>
                 </motion.div>
-                {item.year && <motion.h3 layout className="timeline-year text-gold">{item.year}</motion.h3>}
-                {item.title && <motion.h4 layout className="timeline-title">{item.title}</motion.h4>}
-                <motion.div layout className="timeline-desc">
-                  <div className={expanded[index] ? '' : 'line-clamp-4'}>
-                    {item.desc}
-                  </div>
-                  {item.desc.length > 200 && (
-                    <motion.div 
-                      layout
-                      className="text-gold" 
-                      style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '5px',
-                        fontSize: '0.85rem', 
-                        marginTop: '15px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      {expanded[index] ? 'Thu gọn' : 'Xem thêm'}
-                      {expanded[index] ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </motion.div>
-                  )}
-                </motion.div>
-              </motion.div>
+              </Tilt3DCard>
             </motion.div>
           ))}
         </div>

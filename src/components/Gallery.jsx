@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Quote } from 'lucide-react';
 import Guestbook from './Guestbook';
+import Tilt3DCard from './Tilt3DCard';
 import './Gallery.css';
 
 const quotes = [
@@ -56,17 +57,18 @@ const Gallery = () => {
         <div className="container">
           <div className="quotes-grid">
             {quotes.map((quote, index) => (
-              <motion.div 
-                className="quote-card glass"
+              <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.94 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                transition={{ duration: 0.6, delay: index * 0.15 }}
               >
-                <Quote className="quote-icon" size={40} />
-                <p className="quote-text">{quote.text}</p>
-                <p className="quote-source">- {quote.source} -</p>
+                <Tilt3DCard className="quote-card glass" maxTilt={6} scale={1.02}>
+                  <Quote className="quote-icon" size={40} style={{ transform: 'translateZ(20px)' }} />
+                  <p className="quote-text" style={{ transform: 'translateZ(28px)' }}>{quote.text}</p>
+                  <p className="quote-source" style={{ transform: 'translateZ(18px)' }}>- {quote.source} -</p>
+                </Tilt3DCard>
               </motion.div>
             ))}
           </div>
@@ -90,41 +92,46 @@ const Gallery = () => {
           
           <div className="gallery-grid">
             {galleryItems.map((item, index) => (
-              <motion.div 
-                className="gallery-item glass"
+              <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                onClick={() => {
-                  if (item.link && item.link !== "#") {
-                    window.open(item.link, '_blank');
-                  }
-                }}
-                style={{ cursor: item.link !== "#" ? 'pointer' : 'default' }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
               >
-                <div className="gallery-img-container">
-                  {item.img ? (
-                    <>
-                      <img src={item.img} alt={item.title} className="gallery-img" />
-                      {item.link !== "#" && (
-                        <div className="play-overlay">
-                          <div className="play-button">▶</div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="gallery-img-placeholder">
-                      <span>{item.title}</span>
+                <Tilt3DCard
+                  className="gallery-item glass"
+                  maxTilt={10}
+                  scale={1.03}
+                  onClick={() => {
+                    if (item.link && item.link !== "#") {
+                      window.open(item.link, '_blank');
+                    }
+                  }}
+                  style={{ cursor: item.link !== "#" ? 'pointer' : 'default' }}
+                >
+                  <div className="gallery-img-container">
+                    {item.img ? (
+                      <>
+                        <img src={item.img} alt={item.title} className="gallery-img" />
+                        {item.link !== "#" && (
+                          <div className="play-overlay">
+                            <div className="play-button" style={{ transform: 'translateZ(30px)' }}>▶</div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="gallery-img-placeholder">
+                        <span>{item.title}</span>
+                      </div>
+                    )}
+                  </div>
+                  {item.img && (
+                    <div className="gallery-info" style={{ transform: 'translateZ(22px)' }}>
+                      <h3>{item.title}</h3>
                     </div>
                   )}
-                </div>
-                {item.img && (
-                  <div className="gallery-info">
-                    <h3>{item.title}</h3>
-                  </div>
-                )}
+                </Tilt3DCard>
               </motion.div>
             ))}
           </div>

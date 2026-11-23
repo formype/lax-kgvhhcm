@@ -1,4 +1,5 @@
 import React from 'react';
+import Ambient3DBackground from '../components/Ambient3DBackground';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import Timeline from '../components/Timeline';
@@ -9,12 +10,12 @@ import Footer from '../components/Footer';
 function Home() {
   return (
     <div className="app">
-      {/* Global Fixed Background */}
-      <div className="global-graphics">
-        <div className="symbol symbol-party">☭</div>
-        <div className="symbol symbol-nation">★</div>
-        <div className="global-overlay"></div>
+      {/* Nền không gian 3D chiều sâu + ánh sáng Bảo tàng */}
+      <div className="global-graphics" aria-hidden="true">
+        <div className="global-spotlight-top"></div>
+        <div className="global-vignette"></div>
       </div>
+      <Ambient3DBackground />
 
       <Navbar />
       <main>

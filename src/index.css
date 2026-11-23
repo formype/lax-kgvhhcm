@@ -1,29 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
 :root {
-  /* Color Palette - Đảng & Bác Hồ theme */
-  --primary-red: #D32F2F;      /* Đỏ cờ */
-  --primary-dark: #8c1010;     /* Đỏ sậm */
-  --accent-gold: #FFC107;      /* Vàng sao */
-  --accent-gold-light: #FFD54F;
-  
-  --bg-dark: #121212;
-  --bg-darker: #0a0a0a;
-  --bg-card: rgba(255, 255, 255, 0.05);
-  --bg-light: #f5f5f5;
-  
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-dark: #333333;
-  
-  /* Typography */
-  --font-serif: 'Playfair Display', serif;
-  --font-sans: 'Inter', sans-serif;
-  
-  /* Transitions */
+  /* Bảng màu Bảo tàng Trang trọng Cổ điển: Đỏ son - Đỏ thẫm - Vàng đồng - Trắng ngà */
+  --primary-red: #8B151B;
+  --primary-bright: #A91D24;
+  --primary-dark: #2B0709;
+  --accent-gold: #D4AF37;
+  --accent-gold-light: #F3E5AB;
+  --accent-gold-muted: rgba(212, 175, 55, 0.32);
+
+  --bg-dark: #100405;
+  --bg-darker: #080203;
+  --bg-card: rgba(24, 7, 9, 0.72);
+
+  --text-primary: #F8F4EC;
+  --text-secondary: rgba(248, 244, 236, 0.78);
+
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
   --transition-fast: 0.2s ease;
-  --transition-normal: 0.3s ease;
-  --transition-slow: 0.5s ease;
+  --transition-normal: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow: 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 * {
@@ -39,62 +37,44 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: linear-gradient(135deg, #0a0000 0%, #4a0000 50%, #120000 100%);
+  background: linear-gradient(180deg, #1E0507 0%, #110304 45%, #090203 100%);
   background-attachment: fixed;
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.7;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Global Fixed Background */
+/* Global Museum Lighting */
 .global-graphics {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
 }
 
-.global-overlay {
+.global-spotlight-top {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at top right, rgba(255, 193, 7, 0.15) 0%, transparent 60%),
-              radial-gradient(circle at bottom left, rgba(211, 47, 47, 0.5) 0%, transparent 70%);
+  top: -15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110vw;
+  height: 75vh;
+  background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.12) 0%, rgba(139, 21, 27, 0.18) 40%, transparent 72%);
 }
 
-.symbol {
+.global-vignette {
   position: absolute;
-  font-family: Arial, sans-serif;
-  font-size: clamp(300px, 40vw, 800px);
-  color: var(--accent-gold);
-  opacity: 0.08;
-  text-shadow: 0 0 50px rgba(255, 193, 7, 0.4);
-  line-height: 1;
-  user-select: none;
-}
-
-.symbol-party {
-  top: -10%;
-  left: -5%;
-  transform: rotate(15deg);
-}
-
-.symbol-nation {
-  bottom: -15%;
-  right: -5%;
-  transform: rotate(-15deg);
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 55%, rgba(5, 1, 2, 0.65) 100%);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   font-weight: 700;
   margin-bottom: 1rem;
+  letter-spacing: 0.015em;
 }
 
 a {
@@ -114,98 +94,137 @@ img {
 /* Typography Utilities */
 .text-center { text-align: center; }
 .text-gold { color: var(--accent-gold); }
-.text-red { color: var(--primary-red); }
+.text-gold-light { color: var(--accent-gold-light); }
+.text-red { color: var(--primary-bright); }
 
 /* Layout Utilities */
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1160px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 24px;
 }
 
 .section {
-  padding: 80px 0;
+  padding: 88px 0;
 }
 
-/* Reusable Components */
+/* Solemn Museum Buttons */
 .btn {
-  display: inline-block;
-  padding: 12px 28px;
-  background: var(--primary-red);
-  color: white;
-  border: 2px solid var(--primary-red);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 30px;
+  background: rgba(139, 21, 27, 0.85);
+  color: var(--text-primary);
+  border: 1px solid rgba(212, 175, 55, 0.5);
   border-radius: 4px;
   font-weight: 600;
+  font-size: 0.88rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   cursor: pointer;
   transition: var(--transition-normal);
 }
 
 .btn:hover {
-  background: transparent;
-  color: var(--primary-red);
-  box-shadow: 0 0 15px rgba(211, 47, 47, 0.4);
+  background: var(--primary-bright);
+  border-color: var(--accent-gold-light);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px);
 }
 
 .btn-gold {
-  background: var(--accent-gold);
-  color: var(--bg-darker);
-  border-color: var(--accent-gold);
+  background: linear-gradient(135deg, #D4AF37 0%, #B28922 100%);
+  color: #160506;
+  border-color: var(--accent-gold-light);
 }
 
 .btn-gold:hover {
-  background: transparent;
-  color: var(--accent-gold);
-  box-shadow: 0 0 15px rgba(255, 193, 7, 0.4);
+  background: linear-gradient(135deg, #F3E5AB 0%, #D4AF37 100%);
+  color: #160506;
+  box-shadow: 0 8px 28px rgba(212, 175, 55, 0.3);
 }
 
 /* Section Titles */
 .section-title {
-  font-size: 2.5rem;
+  font-size: 2.35rem;
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 3.25rem;
   position: relative;
   display: block;
   width: 100%;
+  color: var(--accent-gold-light);
+  letter-spacing: 0.03em;
 }
 
 .section-title::after {
-  content: '';
+  content: '✦';
   position: absolute;
-  bottom: -10px;
+  bottom: -26px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background-color: var(--accent-gold);
+  font-size: 0.9rem;
+  color: var(--accent-gold);
+  padding: 0 14px;
+  background: transparent;
 }
 
-/* Glassmorphism */
+.section-title::before {
+  content: '';
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.65), transparent);
+}
+
+/* Refined Museum Card Surface */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .section {
-    padding: 50px 0;
-  }
-  .section-title {
-    font-size: 2rem;
-  }
-  
-  .mobile-break {
-    display: block;
-  }
+  background: linear-gradient(165deg, rgba(34, 10, 12, 0.78) 0%, rgba(14, 4, 5, 0.9) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(243, 229, 171, 0.1);
 }
 
 .mobile-break {
   display: none;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0c0304;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.35);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.6);
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 0;
+  }
+  .section-title {
+    font-size: 1.85rem;
+    margin-bottom: 2.75rem;
+  }
+  .mobile-break {
+    display: block;
+  }
 }
 
 /* RGB LED Border Effect for all cards and frames */
@@ -221,9 +240,9 @@ img {
   }
 }
 
-.glass:not(.timeline-content), 
-.guestbook-form-card, 
-.reflection-card, 
+.glass:not(.timeline-content),
+.guestbook-form-card,
+.reflection-card,
 .reflections-list,
 .admin-card,
 .admin-login-box {
@@ -231,9 +250,9 @@ img {
   border-color: transparent !important;
 }
 
-.glass:not(.timeline-content)::after, 
-.guestbook-form-card::after, 
-.reflection-card::after, 
+.glass:not(.timeline-content)::after,
+.guestbook-form-card::after,
+.reflection-card::after,
 .reflections-list::after,
 .admin-card::after,
 .admin-login-box::after {
@@ -242,10 +261,10 @@ img {
   inset: -1px;
   border-radius: inherit;
   padding: 1.5px;
-  background: conic-gradient(from var(--angle), 
+  background: conic-gradient(from var(--angle),
     #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;

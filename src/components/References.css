@@ -1,5 +1,5 @@
 .references-section {
-  padding: 60px 5% 100px;
+  padding: 70px 0 96px;
   position: relative;
   background: transparent;
 }
@@ -9,30 +9,27 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 14px;
 }
 
 .reference-item {
   display: flex;
   align-items: center;
-  padding: 20px 25px;
-  background: rgba(20, 20, 20, 0.6);
-  border: 1px solid rgba(255, 193, 7, 0.15);
-  border-radius: 12px;
+  padding: 20px 26px;
+  border-radius: 8px;
   text-decoration: none;
-  transition: all 0.3s ease;
-  group: hover;
+  transition: var(--transition-normal);
 }
 
 .reference-item:hover {
-  background: rgba(255, 193, 7, 0.1);
-  border-color: rgba(255, 193, 7, 0.4);
-  transform: translateX(10px);
+  border-color: rgba(212, 175, 55, 0.55);
+  transform: translateX(6px);
+  background: linear-gradient(165deg, rgba(46, 12, 15, 0.85) 0%, rgba(18, 5, 6, 0.92) 100%);
 }
 
 .ref-icon {
   color: var(--accent-gold);
-  margin-right: 20px;
+  margin-right: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -46,49 +43,46 @@
 }
 
 .ref-number {
-  color: var(--primary-red);
-  font-weight: bold;
-  font-size: 1.2rem;
+  color: var(--accent-gold);
+  font-weight: 700;
+  font-size: 1.15rem;
   font-family: var(--font-serif);
 }
 
 .ref-title {
-  color: #fff;
-  font-size: 1.1rem;
+  color: var(--text-primary);
+  font-size: 1.06rem;
   font-weight: 500;
   line-height: 1.5;
   margin: 0;
-  transition: color 0.3s ease;
+  transition: color var(--transition-fast);
 }
 
 .reference-item:hover .ref-title {
-  color: var(--accent-gold);
+  color: var(--accent-gold-light);
 }
 
 .ref-link-icon {
-  color: var(--text-secondary);
-  opacity: 0.5;
-  transition: all 0.3s ease;
+  color: var(--accent-gold);
+  opacity: 0.65;
+  transition: var(--transition-fast);
 }
 
 .reference-item:hover .ref-link-icon {
   opacity: 1;
-  color: var(--accent-gold);
-  transform: translate(3px, -3px);
+  transform: translate(2px, -2px);
 }
 
 @media (max-width: 768px) {
   .reference-item {
-    padding: 15px 20px;
+    padding: 16px 18px;
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
+    gap: 12px;
   }
-  
   .ref-icon {
     display: none;
   }
-  
   .ref-link-icon {
     align-self: flex-end;
   }
