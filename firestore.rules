@@ -1,0 +1,159 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Project: lax-kgvhhcm
+    //
+    // Collection: reflections (Guestbook entries)
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, 1..120 chars, trimmed non-empty, immutable)
+    //   - class_name: string | null (optional, 0..60 chars if non-null string, immutable)
+    //   - content: string (required, 1..5000 chars, trimmed non-empty, immutable)
+    //   - is_approved: bool (required, must be false on create; only mutable field by Admin)
+    //   - created_at: timestamp (required, must equal request.time on create, immutable)
+    //
+    // Collection: survey_results (Top 50 Quiz Leaderboard)
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, 1..120 chars, trimmed non-empty)
+    //   - role: string (required, strictly 'Giáo viên' or 'Học sinh')
+    //   - class_name: string | null (required non-empty trimmed string <= 60 if role == 'Học sinh';
+    //                 must be null, '', or omitted if role == 'Giáo viên')
+    //   - score: int (required, 0 <= score <= 20)
+    //   - total_questions: int (required, strictly == 20)
+    //   - duration_seconds: int (required, 0 <= duration_seconds <= 86400)
+    //   - created_at: timestamp (required, must equal request.time on create)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    // Check if the user is authenticated (Admin signed in via Firebase Auth)
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Validate that the document contains only the allowed fields
+    function hasOnlyAllowedFields(data, fields) {
+      return data.keys().hasOnly(fields);
+    }
+
+    // Validate that all required fields exist
+    function hasRequiredFields(data, fields) {
+      return data.keys().hasAll(fields);
+    }
+
+    // Validate a non-empty trimmed string within [minLen, maxLen]
+    function isValidNonEmptyString(val, minLen, maxLen) {
+      return val is string &&
+             val.size() >= minLen &&
+             val.size() <= maxLen &&
+             val.trim().size() >= 1;
+    }
+
+    // Validate an optional/nullable string field within maxLen
+    function isValidOptionalNullableString(data, field, maxLen) {
+      return !(field in data) ||
+             data[field] == null ||
+             (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    // Validate that only the specified fields were modified on update
+    function onlyChangedFields(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidReflection(data) {
+      return hasOnlyAllowedFields(data, ['name', 'class_name', 'content', 'is_approved', 'created_at']) &&
+             hasRequiredFields(data, ['name', 'content', 'is_approved', 'created_at']) &&
+             isValidNonEmptyString(data.name, 1, 120) &&
+             isValidOptionalNullableString(data, 'class_name', 60) &&
+             isValidNonEmptyString(data.content, 1, 5000) &&
+             data.is_approved is bool &&
+             data.created_at is timestamp;
+    }
+
+    function isValidSurveyClassName(data) {
+      return (data.role == 'Học sinh' &&
+              'class_name' in data &&
+              isValidNonEmptyString(data.class_name, 1, 60)) ||
+             (data.role == 'Giáo viên' &&
+              (!('class_name' in data) || data.class_name == null || data.class_name == ''));
+    }
+
+    function isValidSurveyResult(data) {
+      return hasOnlyAllowedFields(data, ['name', 'role', 'class_name', 'score', 'total_questions', 'duration_seconds', 'created_at']) &&
+             hasRequiredFields(data, ['name', 'role', 'score', 'total_questions', 'duration_seconds', 'created_at']) &&
+             isValidNonEmptyString(data.name, 1, 120) &&
+             data.role is string &&
+             data.role in ['Giáo viên', 'Học sinh'] &&
+             isValidSurveyClassName(data) &&
+             data.score is int &&
+             data.score >= 0 &&
+             data.score <= 20 &&
+             data.total_questions is int &&
+             data.total_questions == 20 &&
+             data.duration_seconds is int &&
+             data.duration_seconds >= 0 &&
+             data.duration_seconds <= 86400 &&
+             data.created_at is timestamp;
+    }
+
+    // ===============================================================
+    // Collection Rules
+    // ===============================================================
+
+    // Guestbook reflections:
+    // - Public can read (get, list) only approved entries; Admin can read all entries.
+    // - Public can create unapproved entries with strict schema & server timestamp.
+    // - Admin can update only is_approved (bool), preserving all other fields.
+    // - Admin can delete entries.
+    match /reflections/{reflectionId} {
+      allow read: if isAuthenticated() || resource.data.is_approved == true;
+
+      allow create: if isValidReflection(request.resource.data) &&
+                       request.resource.data.is_approved == false &&
+                       request.resource.data.created_at == request.time;
+
+      allow update: if isAuthenticated() &&
+                       isValidReflection(request.resource.data) &&
+                       onlyChangedFields(['is_approved']) &&
+                       request.resource.data.is_approved is bool;
+
+      allow delete: if isAuthenticated();
+    }
+
+    // Quiz leaderboard (Top 50):
+    // - Public can read (get, list) for the public Top 50 leaderboard.
+    // - Public can create entries with strict schema, range checks, and server timestamp.
+    // - Updates are denied for everyone (leaderboard entries are immutable).
+    // - Admin can delete entries.
+    match /survey_results/{resultId} {
+      allow read: if true;
+
+      allow create: if isValidSurveyResult(request.resource.data) &&
+                       request.resource.data.created_at == request.time;
+
+      allow update: if false;
+
+      allow delete: if isAuthenticated();
+    }
+
+    // Default deny-all fallback for all other collections and subcollections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

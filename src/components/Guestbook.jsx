@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Send, CheckCircle, MessageSquareQuote } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  serverTimestamp
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import './Guestbook.css';
+
+function formatDate(createdAt) {
+  if (!createdAt) return '';
+  const date = typeof createdAt.toDate === 'function' ? createdAt.toDate() : new Date(createdAt);
+  return date.toLocaleDateString('vi-VN');
+}
 
 function Guestbook() {
   const [formData, setFormData] = useState({ name: '', className: '', content: '' });
@@ -12,44 +27,42 @@ function Guestbook() {
   const [reflections, setReflections] = useState([]);
 
   useEffect(() => {
-    fetchReflections();
-    
-    // Set up realtime subscription for new approved reflections
-    const subscription = supabase
-      .channel('public:reflections')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'reflections' }, payload => {
-        fetchReflections();
-      })
-      .subscribe();
+    const q = query(
+      collection(db, 'reflections'),
+      where('is_approved', '==', true),
+      orderBy('created_at', 'desc')
+    );
 
-    return () => {
-      supabase.removeChannel(subscription);
-    };
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const list = snapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        }));
+        setReflections(list);
+      },
+      (err) => {
+        console.error('Error fetching reflections:', err);
+      }
+    );
+
+    return () => unsubscribe();
   }, []);
-
-  const fetchReflections = async () => {
-    const { data, error } = await supabase
-      .from('reflections')
-      .select('*')
-      .eq('is_approved', true)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Error fetching reflections:', error);
-    } else {
-      setReflections(data);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'content' && value.length > 5000) return;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.content) {
+    const trimmedName = formData.name.trim();
+    const trimmedContent = formData.content.trim();
+    const trimmedClass = formData.className.trim();
+
+    if (!trimmedName || !trimmedContent) {
       setError('Vui lòng điền họ tên và cảm nhận.');
       return;
     }
@@ -57,33 +70,30 @@ function Guestbook() {
     setIsSubmitting(true);
     setError(null);
 
-    const { error } = await supabase
-      .from('reflections')
-      .insert([
-        { 
-          name: formData.name, 
-          class_name: formData.className, 
-          content: formData.content,
-          is_approved: false
-        }
-      ]);
+    try {
+      await addDoc(collection(db, 'reflections'), {
+        name: trimmedName,
+        class_name: trimmedClass || null,
+        content: trimmedContent,
+        is_approved: false,
+        created_at: serverTimestamp()
+      });
 
-    setIsSubmitting(false);
-
-    if (error) {
-      setError('Lỗi hệ thống: ' + error.message);
-      console.error(error);
-    } else {
       setSubmitSuccess(true);
       setFormData({ name: '', className: '', content: '' });
       setTimeout(() => setSubmitSuccess(false), 5000);
+    } catch (err) {
+      setError('Lỗi hệ thống: ' + err.message);
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <section className="guestbook-section" id="guestbook">
       <div className="guestbook-container">
-        <motion.div 
+        <motion.div
           className="guestbook-header text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -95,7 +105,7 @@ function Guestbook() {
         </motion.div>
 
         <div className="guestbook-content">
-          <motion.div 
+          <motion.div
             className="guestbook-form-card"
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -112,37 +122,37 @@ function Guestbook() {
               <form onSubmit={handleSubmit} className="guestbook-form">
                 <div className="form-group">
                   <label htmlFor="name">Họ và tên <span className="required">*</span></label>
-                  <input 
-                    type="text" 
-                    id="name" 
-                    name="name" 
-                    value={formData.name} 
-                    onChange={handleChange} 
-                    placeholder="Hãy nhập họ và tên của bạn..." 
-                    required 
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Hãy nhập họ và tên của bạn..."
+                    required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="className">Lớp (Tùy chọn)</label>
-                  <input 
-                    type="text" 
-                    id="className" 
-                    name="className" 
-                    value={formData.className} 
-                    onChange={handleChange} 
-                    placeholder="VD: 9/1 (Dành cho học sinh trường THCS Lê Anh Xuân)" 
+                  <input
+                    type="text"
+                    id="className"
+                    name="className"
+                    value={formData.className}
+                    onChange={handleChange}
+                    placeholder="VD: 9/1 (Dành cho học sinh trường THCS Lê Anh Xuân)"
                   />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="content">Cảm nhận của bản thân <span className="required">*</span></label>
-                  <textarea 
-                    id="content" 
-                    name="content" 
-                    value={formData.content} 
-                    onChange={handleChange} 
-                    placeholder="Hãy viết những suy nghĩ, cảm nhận hoặc lời hứa của bạn..." 
+                  <textarea
+                    id="content"
+                    name="content"
+                    value={formData.content}
+                    onChange={handleChange}
+                    placeholder="Hãy viết những suy nghĩ, cảm nhận hoặc lời hứa của bạn..."
                     rows="6"
                     required
                   ></textarea>
@@ -162,7 +172,7 @@ function Guestbook() {
             )}
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="reflections-list"
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -170,7 +180,7 @@ function Guestbook() {
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             <h3><MessageSquareQuote size={24} /> Lời nhắn gửi</h3>
-            
+
             <div className="reflections-scroll">
               {reflections.length === 0 ? (
                 <div className="no-reflections">
@@ -185,7 +195,7 @@ function Guestbook() {
                         {ref.class_name && <span className="reflection-class">Lớp {ref.class_name}</span>}
                       </div>
                       <div className="reflection-date">
-                        {new Date(ref.created_at).toLocaleDateString('vi-VN')}
+                        {formatDate(ref.created_at)}
                       </div>
                     </div>
                     <div className="reflection-body">

@@ -1,87 +1,104 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { LogIn, LogOut, CheckCircle, XCircle, Trash2, Eye, EyeOff } from 'lucide-react';
+import {
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from 'firebase/auth';
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc
+} from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
+import { LogIn, LogOut, CheckCircle, Trash2, EyeOff } from 'lucide-react';
 import './Admin.css';
 
+function formatDateTime(createdAt) {
+  if (!createdAt) return '';
+  const date = typeof createdAt.toDate === 'function' ? createdAt.toDate() : new Date(createdAt);
+  return date.toLocaleString('vi-VN');
+}
+
 function Admin() {
-  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
-  
+
   const [reflections, setReflections] = useState([]);
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'approved'
+  const [activeTab, setActiveTab] = useState('pending');
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
       setLoading(false);
-      if (session) fetchReflections();
     });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) fetchReflections();
-    });
-
-    return () => subscription.unsubscribe();
+    return () => unsubAuth();
   }, []);
 
-  const fetchReflections = async () => {
-    const { data, error } = await supabase
-      .from('reflections')
-      .select('*')
-      .order('created_at', { ascending: false });
-      
-    if (!error && data) {
-      setReflections(data);
+  useEffect(() => {
+    if (!user) {
+      setReflections([]);
+      return undefined;
     }
-  };
+
+    const q = query(collection(db, 'reflections'), orderBy('created_at', 'desc'));
+    const unsubData = onSnapshot(
+      q,
+      (snapshot) => {
+        setReflections(
+          snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...docSnap.data()
+          }))
+        );
+      },
+      (err) => {
+        console.error('Error loading reflections:', err);
+      }
+    );
+
+    return () => unsubData();
+  }, [user]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setAuthError(null);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) setAuthError(error.message);
-    setLoading(false);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      setAuthError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut(auth);
   };
 
   const toggleApproval = async (id, currentStatus) => {
-    const { error } = await supabase
-      .from('reflections')
-      .update({ is_approved: !currentStatus })
-      .eq('id', id);
-      
-    if (!error) {
-      fetchReflections();
-    } else {
-      alert("Lỗi cập nhật: " + error.message);
+    try {
+      await updateDoc(doc(db, 'reflections', id), {
+        is_approved: !currentStatus
+      });
+    } catch (err) {
+      alert('Lỗi cập nhật: ' + err.message);
     }
   };
 
   const deleteReflection = async (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này vĩnh viễn?")) {
-      const { error } = await supabase
-        .from('reflections')
-        .delete()
-        .eq('id', id);
-        
-      if (!error) {
-        fetchReflections();
-      } else {
-        alert("Lỗi xóa: " + error.message);
+    if (window.confirm('Bạn có chắc chắn muốn xóa bài viết này vĩnh viễn?')) {
+      try {
+        await deleteDoc(doc(db, 'reflections', id));
+      } catch (err) {
+        alert('Lỗi xóa: ' + err.message);
       }
     }
   };
@@ -90,7 +107,7 @@ function Admin() {
     return <div className="admin-loading">Đang tải...</div>;
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="admin-login-container">
         <div className="admin-login-box">
@@ -98,20 +115,20 @@ function Admin() {
           <form onSubmit={handleLogin}>
             <div className="form-group">
               <label>Email Admin</label>
-              <input 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
             <div className="form-group">
               <label>Mật khẩu</label>
-              <input 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
             {authError && <div className="error-message">{authError}</div>}
@@ -123,8 +140,8 @@ function Admin() {
     );
   }
 
-  const pendingReflections = reflections.filter(r => !r.is_approved);
-  const approvedReflections = reflections.filter(r => r.is_approved);
+  const pendingReflections = reflections.filter((r) => !r.is_approved);
+  const approvedReflections = reflections.filter((r) => r.is_approved);
   const displayList = activeTab === 'pending' ? pendingReflections : approvedReflections;
 
   return (
@@ -134,7 +151,7 @@ function Admin() {
           <h2>Bảng Quản Trị Hệ Thống</h2>
         </div>
         <div className="admin-user">
-          <span>{session.user.email}</span>
+          <span>{user.email}</span>
           <button onClick={handleLogout} className="logout-btn"><LogOut size={16} /> Thoát</button>
           <a href="/" className="view-site-btn" target="_blank" rel="noreferrer">Xem website</a>
         </div>
@@ -142,13 +159,13 @@ function Admin() {
 
       <main className="admin-main">
         <div className="admin-tabs">
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
             onClick={() => setActiveTab('pending')}
           >
             Chờ duyệt ({pendingReflections.length})
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
             onClick={() => setActiveTab('approved')}
           >
@@ -160,13 +177,13 @@ function Admin() {
           {displayList.length === 0 ? (
             <div className="empty-state">Không có dữ liệu trong danh mục này.</div>
           ) : (
-            displayList.map(item => (
+            displayList.map((item) => (
               <div key={item.id} className="admin-card">
                 <div className="admin-card-header">
                   <div className="admin-card-info">
-                    <strong>{item.name}</strong> 
+                    <strong>{item.name}</strong>
                     {item.class_name && <span className="badge">Lớp {item.class_name}</span>}
-                    <span className="date">{new Date(item.created_at).toLocaleString('vi-VN')}</span>
+                    <span className="date">{formatDateTime(item.created_at)}</span>
                   </div>
                   <div className="admin-card-actions">
                     {item.is_approved ? (
