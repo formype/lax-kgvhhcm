@@ -30,6 +30,21 @@ service cloud.firestore {
     //   - duration_seconds: int (required, 0 <= duration_seconds <= 86400)
     //   - created_at: timestamp (required, must equal request.time on create)
     //
+    // Collection: creative_items (Creative Corner Showcase)
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, 1..120 chars, trimmed non-empty)
+    //   - role: string (required, strictly 'Giáo viên' or 'Học sinh')
+    //   - class_name: string | null (required non-empty trimmed string <= 60 if role == 'Học sinh';
+    //                 must be null, '', or omitted if role == 'Giáo viên')
+    //   - title: string (required, 1..150 chars, trimmed non-empty)
+    //   - description: string | null (optional/nullable string <= 1000 chars)
+    //   - media_type: string (required, strictly 'image' or 'video')
+    //   - media_url: string (required, 10..1000 chars, starts with 'https://')
+    //   - drive_file_id: string (required, 5..150 chars, trimmed non-empty)
+    //   - file_name: string (required, 1..255 chars, trimmed non-empty)
+    //   - created_at: timestamp (required, must equal request.time on create)
+    //
     // ===============================================================
 
     // ===============================================================
@@ -111,6 +126,26 @@ service cloud.firestore {
              data.created_at is timestamp;
     }
 
+    function isValidCreativeItem(data) {
+      return hasOnlyAllowedFields(data, ['name', 'role', 'class_name', 'title', 'description', 'media_type', 'media_url', 'drive_file_id', 'file_name', 'created_at']) &&
+             hasRequiredFields(data, ['name', 'role', 'title', 'media_type', 'media_url', 'drive_file_id', 'file_name', 'created_at']) &&
+             isValidNonEmptyString(data.name, 1, 120) &&
+             data.role is string &&
+             data.role in ['Giáo viên', 'Học sinh'] &&
+             isValidSurveyClassName(data) &&
+             isValidNonEmptyString(data.title, 1, 150) &&
+             isValidOptionalNullableString(data, 'description', 1000) &&
+             data.media_type is string &&
+             data.media_type in ['image', 'video'] &&
+             data.media_url is string &&
+             data.media_url.size() >= 10 &&
+             data.media_url.size() <= 1000 &&
+             data.media_url.matches('^https://.*') &&
+             isValidNonEmptyString(data.drive_file_id, 5, 150) &&
+             isValidNonEmptyString(data.file_name, 1, 255) &&
+             data.created_at is timestamp;
+    }
+
     // ===============================================================
     // Collection Rules
     // ===============================================================
@@ -144,6 +179,22 @@ service cloud.firestore {
       allow read: if true;
 
       allow create: if isValidSurveyResult(request.resource.data) &&
+                       request.resource.data.created_at == request.time;
+
+      allow update: if false;
+
+      allow delete: if isAuthenticated();
+    }
+
+    // Creative Corner showcase items:
+    // - Public can read (get, list) so visitors can view uploaded images and watch videos.
+    // - Public can create entries with strict schema, type/range checks, and server timestamp.
+    // - Updates are denied for everyone (creative items are immutable).
+    // - Admin can delete entries.
+    match /creative_items/{itemId} {
+      allow read: if true;
+
+      allow create: if isValidCreativeItem(request.resource.data) &&
                        request.resource.data.created_at == request.time;
 
       allow update: if false;

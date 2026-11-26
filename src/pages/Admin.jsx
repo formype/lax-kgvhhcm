@@ -31,6 +31,7 @@ function Admin() {
   const [authError, setAuthError] = useState(null);
 
   const [reflections, setReflections] = useState([]);
+  const [creativeItems, setCreativeItems] = useState([]);
   const [activeTab, setActiveTab] = useState('pending');
 
   useEffect(() => {
@@ -44,6 +45,7 @@ function Admin() {
   useEffect(() => {
     if (!user) {
       setReflections([]);
+      setCreativeItems([]);
       return undefined;
     }
 
@@ -63,7 +65,26 @@ function Admin() {
       }
     );
 
-    return () => unsubData();
+    const qCreative = query(collection(db, 'creative_items'), orderBy('created_at', 'desc'));
+    const unsubCreative = onSnapshot(
+      qCreative,
+      (snapshot) => {
+        setCreativeItems(
+          snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...docSnap.data()
+          }))
+        );
+      },
+      (err) => {
+        console.error('Error loading creative_items:', err);
+      }
+    );
+
+    return () => {
+      unsubData();
+      unsubCreative();
+    };
   }, [user]);
 
   const handleLogin = async (e) => {
@@ -97,6 +118,16 @@ function Admin() {
     if (window.confirm('Bạn có chắc chắn muốn xóa bài viết này vĩnh viễn?')) {
       try {
         await deleteDoc(doc(db, 'reflections', id));
+      } catch (err) {
+        alert('Lỗi xóa: ' + err.message);
+      }
+    }
+  };
+
+  const deleteCreativeItem = async (id) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa tác phẩm này khỏi Góc sáng tạo?')) {
+      try {
+        await deleteDoc(doc(db, 'creative_items', id));
       } catch (err) {
         alert('Lỗi xóa: ' + err.message);
       }
@@ -171,9 +202,44 @@ function Admin() {
           >
             Đã duyệt ({approvedReflections.length})
           </button>
+          <button
+            className={`tab-btn ${activeTab === 'creative' ? 'active' : ''}`}
+            onClick={() => setActiveTab('creative')}
+          >
+            Góc sáng tạo ({creativeItems.length})
+          </button>
         </div>
 
-        <div className="admin-list">
+        {activeTab === 'creative' ? (
+          <div className="admin-list">
+            {creativeItems.length === 0 ? (
+              <div className="empty-state">Chưa có tác phẩm nào trong Góc sáng tạo.</div>
+            ) : (
+              creativeItems.map((item) => (
+                <div key={item.id} className="admin-card">
+                  <div className="admin-card-header">
+                    <div className="admin-card-info">
+                      <strong>{item.title}</strong>
+                      <span className="badge">{item.media_type === 'video' ? 'Video' : 'Ảnh'}</span>
+                      <span className="badge">{item.name}{item.class_name ? ` - Lớp ${item.class_name}` : ` - ${item.role}`}</span>
+                      <span className="date">{formatDateTime(item.created_at)}</span>
+                    </div>
+                    <div className="admin-card-actions">
+                      <button onClick={() => deleteCreativeItem(item.id)} className="action-btn danger" title="Xóa khỏi Góc sáng tạo">
+                        <Trash2 size={16} /> Xóa
+                      </button>
+                    </div>
+                  </div>
+                  <div className="admin-card-body">
+                    <div>Tệp Drive: <code>{item.file_name}</code></div>
+                    {item.description && <div style={{ marginTop: 6 }}>{item.description}</div>}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        ) : (
+          <div className="admin-list">
           {displayList.length === 0 ? (
             <div className="empty-state">Không có dữ liệu trong danh mục này.</div>
           ) : (
@@ -207,6 +273,7 @@ function Admin() {
             ))
           )}
         </div>
+        )}
       </main>
     </div>
   );

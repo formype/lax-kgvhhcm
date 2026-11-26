@@ -42,6 +42,9 @@ const Navbar = () => {
           <a href="#timeline" onClick={(e) => handleSectionLink(e, 'timeline')}>Tiểu sử</a>
           <a href="#quotes" onClick={(e) => handleSectionLink(e, 'quotes')}>Lời dạy</a>
           <a href="#gallery" onClick={(e) => handleSectionLink(e, 'gallery')}>Tư liệu</a>
+          <Link to="/goc-sang-tao" className={location.pathname === '/goc-sang-tao' ? 'active' : ''}>
+            Góc sáng tạo
+          </Link>
           <Link to="/khao-sat" className={location.pathname === '/khao-sat' ? 'active' : ''}>
             Khảo sát
           </Link>
@@ -62,6 +65,7 @@ const Navbar = () => {
         <a href="#timeline" onClick={(e) => handleSectionLink(e, 'timeline')}>Tiểu sử</a>
         <a href="#quotes" onClick={(e) => handleSectionLink(e, 'quotes')}>Lời dạy</a>
         <a href="#gallery" onClick={(e) => handleSectionLink(e, 'gallery')}>Tư liệu</a>
+        <Link to="/goc-sang-tao" onClick={() => setIsMobileMenuOpen(false)}>Góc sáng tạo</Link>
         <Link to="/khao-sat" onClick={() => setIsMobileMenuOpen(false)}>Khảo sát</Link>
       </div>
     </nav>

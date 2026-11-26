@@ -36,6 +36,7 @@ const Footer = () => {
               <li><a href="#timeline" onClick={(e) => handleSectionLink(e, 'timeline')}>Tiểu sử</a></li>
               <li><a href="#quotes" onClick={(e) => handleSectionLink(e, 'quotes')}>Lời dạy</a></li>
               <li><a href="#gallery" onClick={(e) => handleSectionLink(e, 'gallery')}>Tư liệu</a></li>
+              <li><Link to="/goc-sang-tao">Góc sáng tạo</Link></li>
               <li><Link to="/khao-sat">Khảo sát</Link></li>
             </ul>
           </div>
