@@ -25,8 +25,8 @@ import Footer from '../components/Footer';
 import { db } from '../lib/firebase';
 import './CreativeCorner.css';
 
-const MAX_IMAGE_MB = 10;
-const MAX_VIDEO_MB = 35;
+const MAX_IMAGE_MB = 20;
+const MAX_VIDEO_MB = 100;
 
 function removeVietnameseTones(str) {
   return str
@@ -83,6 +83,13 @@ function formatDate(createdAt) {
   return date.toLocaleDateString('vi-VN');
 }
 
+function getImageDisplayUrl(item) {
+  if (item.drive_file_id) {
+    return `https://lh3.googleusercontent.com/d/${item.drive_file_id}=w1600`;
+  }
+  return item.media_url;
+}
+
 function CreativeCorner() {
   const [items, setItems] = useState([]);
   const [filter, setFilter] = useState('all'); // 'all' | 'image' | 'video'
@@ -97,6 +104,7 @@ function CreativeCorner() {
   const [previewUrl, setPreviewUrl] = useState('');
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isFormExpanded, setIsFormExpanded] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
@@ -287,7 +295,7 @@ function CreativeCorner() {
             </p>
           </motion.div>
 
-          {/* FORM UPLOAD ẢNH / VIDEO */}
+          {/* FORM UPLOAD ẢNH / VIDEO - BỐ CỤC 2 CỘT CÂN ĐỐI */}
           <motion.section
             className="creative-upload-card glass"
             initial={{ opacity: 0, y: 20 }}
@@ -295,155 +303,185 @@ function CreativeCorner() {
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <div className="creative-card-heading">
-              <Sparkles size={22} className="text-gold" />
-              <h2>Gửi tác phẩm ảnh hoặc video của bạn</h2>
+              <div className="creative-heading-left">
+                <Sparkles size={22} className="text-gold" />
+                <div>
+                  <h2>Gửi tác phẩm ảnh hoặc video</h2>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="creative-toggle-btn"
+                onClick={() => setIsFormExpanded((prev) => !prev)}
+              >
+                {isFormExpanded ? 'Thu gọn biểu mẫu' : '+ Mở biểu mẫu gửi bài'}
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="creative-form">
-              <div className="creative-info-grid">
-                <div className="form-group">
-                  <label htmlFor="creative-name">
-                    Họ và tên <span className="required">*</span>
-                  </label>
-                  <input
-                    id="creative-name"
-                    type="text"
-                    placeholder="Nhập họ và tên đầy đủ..."
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
+            {isFormExpanded && (
+              <form onSubmit={handleSubmit} className="creative-form">
+                <div className="creative-split-grid">
+                  {/* Cột trái: Thông tin người gửi & tác phẩm */}
+                  <div className="creative-col-left">
+                    <div className="form-group">
+                      <label htmlFor="creative-name">
+                        Họ và tên <span className="required">*</span>
+                      </label>
+                      <input
+                        id="creative-name"
+                        type="text"
+                        placeholder="Nhập họ và tên đầy đủ..."
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                      />
+                    </div>
 
-                <div className="form-group">
-                  <label>
-                    Bạn là <span className="required">*</span>
-                  </label>
-                  <div className="role-selector">
-                    <button
-                      type="button"
-                      className={`role-option-btn ${role === 'Giáo viên' ? 'active' : ''}`}
-                      onClick={() => handleRoleChange('Giáo viên')}
-                    >
-                      <UserCheck size={18} />
-                      <span>Giáo viên</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`role-option-btn ${role === 'Học sinh' ? 'active' : ''}`}
-                      onClick={() => handleRoleChange('Học sinh')}
-                    >
-                      <GraduationCap size={18} />
-                      <span>Học sinh</span>
-                    </button>
+                    <div className={`role-and-class-row ${role === 'Học sinh' ? 'with-class' : ''}`}>
+                      <div className="form-group">
+                        <label>
+                          Bạn là <span className="required">*</span>
+                        </label>
+                        <div className="role-selector">
+                          <button
+                            type="button"
+                            className={`role-option-btn ${role === 'Giáo viên' ? 'active' : ''}`}
+                            onClick={() => handleRoleChange('Giáo viên')}
+                          >
+                            <UserCheck size={17} />
+                            <span>Giáo viên</span>
+                          </button>
+                          <button
+                            type="button"
+                            className={`role-option-btn ${role === 'Học sinh' ? 'active' : ''}`}
+                            onClick={() => handleRoleChange('Học sinh')}
+                          >
+                            <GraduationCap size={17} />
+                            <span>Học sinh</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {role === 'Học sinh' && (
+                        <div className="form-group">
+                          <label htmlFor="creative-class">
+                            Lớp <span className="required">*</span>
+                          </label>
+                          <input
+                            id="creative-class"
+                            type="text"
+                            placeholder="VD: 9/1"
+                            value={className}
+                            onChange={(e) => setClassName(e.target.value)}
+                            required
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="creative-title">
+                        Tiêu đề tác phẩm <span className="required">*</span>
+                      </label>
+                      <input
+                        id="creative-title"
+                        type="text"
+                        placeholder="VD: Tranh vẽ Bác Hồ với thiếu nhi..."
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label htmlFor="creative-desc">Mô tả ngắn (Tùy chọn)</label>
+                      <textarea
+                        id="creative-desc"
+                        rows="3"
+                        placeholder="Chia sẻ đôi dòng về ý nghĩa tác phẩm của bạn..."
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Cột phải: Khu vực chọn & xem trước Ảnh / Video */}
+                  <div className="creative-col-right">
+                    <label className="dropzone-outer-label">
+                      Tệp Ảnh (tối đa {MAX_IMAGE_MB}MB) hoặc Video (tối đa {MAX_VIDEO_MB}MB){' '}
+                      <span className="required">*</span>
+                    </label>
+
+                    <label htmlFor="creative-file" className="file-dropzone-panel">
+                      {previewUrl && file ? (
+                        <div className="dropzone-preview-inner">
+                          {file.type.startsWith('image/') ? (
+                            <img src={previewUrl} alt="Xem trước" className="preview-media" />
+                          ) : (
+                            <video src={previewUrl} controls className="preview-media" />
+                          )}
+                          <div className="dropzone-file-badge">
+                            <span>{file.name}</span>
+                            <small>Nhấn để đổi tệp khác</small>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="dropzone-placeholder">
+                          <div className="dropzone-icon-circle">
+                            <Upload size={26} />
+                          </div>
+                          <strong>Nhấn để chọn ảnh hoặc video</strong>
+                          <span>Hỗ trợ JPG, PNG, WEBP, MP4, WEBM, MOV</span>
+                        </div>
+                      )}
+                      <input
+                        id="creative-file"
+                        type="file"
+                        accept="image/*,video/*"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+
+                    {file && (
+                      <div className="renamed-preview-note">
+                        Tên tệp lưu trên Drive:{' '}
+                        <code>
+                          {buildRenamedFileName(
+                            file.name,
+                            name || 'Nguoi_dung',
+                            role || 'Hoc_sinh',
+                            className
+                          )}
+                        </code>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
 
-              {role === 'Học sinh' && (
-                <div className="form-group class-input-wrap">
-                  <label htmlFor="creative-class">
-                    Lớp <span className="required">*</span>
-                  </label>
-                  <input
-                    id="creative-class"
-                    type="text"
-                    placeholder="VD: 9/1, 8/3..."
-                    value={className}
-                    onChange={(e) => setClassName(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
-
-              <div className="creative-info-grid" style={{ marginTop: 14 }}>
-                <div className="form-group">
-                  <label htmlFor="creative-title">
-                    Tiêu đề tác phẩm <span className="required">*</span>
-                  </label>
-                  <input
-                    id="creative-title"
-                    type="text"
-                    placeholder="VD: Tranh vẽ Bác Hồ với thiếu nhi..."
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="creative-file">
-                    Chọn Ảnh (tối đa {MAX_IMAGE_MB}MB) hoặc Video (tối đa {MAX_VIDEO_MB}MB){' '}
-                    <span className="required">*</span>
-                  </label>
-                  <label htmlFor="creative-file" className="file-dropzone">
-                    <Upload size={18} />
-                    <span>
-                      {file
-                        ? `${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`
-                        : 'Nhấn để chọn ảnh hoặc video từ thiết bị...'}
-                    </span>
-                    <input
-                      id="creative-file"
-                      type="file"
-                      accept="image/*,video/*"
-                      onChange={handleFileChange}
-                      style={{ display: 'none' }}
-                    />
-                  </label>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="creative-desc">Mô tả ngắn (Tùy chọn)</label>
-                <textarea
-                  id="creative-desc"
-                  rows="2"
-                  placeholder="Chia sẻ đôi dòng về ý nghĩa tác phẩm của bạn..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              {previewUrl && file && (
-                <div className="upload-preview-box">
-                  <p className="preview-label">
-                    Xem trước tệp (sẽ lưu thành:{' '}
-                    <code>
-                      {buildRenamedFileName(file.name, name || 'Nguoi_dung', role || 'Hoc_sinh', className)}
-                    </code>
-                    ):
-                  </p>
-                  {file.type.startsWith('image/') ? (
-                    <img src={previewUrl} alt="Xem trước" className="preview-media" />
-                  ) : (
-                    <video src={previewUrl} controls className="preview-media" />
-                  )}
-                </div>
-              )}
-
-              {errorMsg && (
-                <div className="creative-alert error">
-                  <AlertCircle size={18} />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
-
-              {successMsg && (
-                <div className="creative-alert success">
-                  <CheckCircle2 size={18} />
-                  <span>{successMsg}</span>
-                </div>
-              )}
-
-              <button type="submit" className="btn btn-gold creative-submit-btn" disabled={isUploading}>
-                {isUploading ? 'Đang tải lên Google Drive...' : (
-                  <>
-                    <Upload size={17} /> Tải tác phẩm lên Góc sáng tạo
-                  </>
+                {errorMsg && (
+                  <div className="creative-alert error">
+                    <AlertCircle size={18} />
+                    <span>{errorMsg}</span>
+                  </div>
                 )}
-              </button>
-            </form>
+
+                {successMsg && (
+                  <div className="creative-alert success">
+                    <CheckCircle2 size={18} />
+                    <span>{successMsg}</span>
+                  </div>
+                )}
+
+                <button type="submit" className="btn btn-gold creative-submit-btn" disabled={isUploading}>
+                  {isUploading ? 'Đang tải lên Google Drive...' : (
+                    <>
+                      <Upload size={17} /> Tải tác phẩm lên Góc sáng tạo
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </motion.section>
 
           {/* KHU TRƯNG BÀY ẢNH & VIDEO */}
@@ -494,9 +532,19 @@ function CreativeCorner() {
                         />
                       ) : (
                         <img
-                          src={item.media_url}
+                          src={getImageDisplayUrl(item)}
                           alt={item.title}
                           className="creative-image-thumb"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            if (
+                              item.drive_file_id &&
+                              !e.currentTarget.dataset.fallbackTried
+                            ) {
+                              e.currentTarget.dataset.fallbackTried = '1';
+                              e.currentTarget.src = `https://drive.google.com/thumbnail?id=${item.drive_file_id}&sz=w1200`;
+                            }
+                          }}
                           onClick={() => setSelectedItem(item)}
                           loading="lazy"
                         />
@@ -556,9 +604,10 @@ function CreativeCorner() {
                 <X size={20} />
               </button>
               <img
-                src={selectedItem.media_url}
+                src={getImageDisplayUrl(selectedItem)}
                 alt={selectedItem.title}
                 className="lightbox-img"
+                referrerPolicy="no-referrer"
               />
               <div className="lightbox-caption">
                 <h3>{selectedItem.title}</h3>

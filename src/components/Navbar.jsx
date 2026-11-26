@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import { usePage } from '../context/PageContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { activePage, navigateToPage } = usePage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,37 +16,45 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleSectionLink = (e, id) => {
+  const handleHomeSection = (e, id) => {
+    e.preventDefault();
     setIsMobileMenuOpen(false);
-    if (location.pathname !== '/') {
-      e.preventDefault();
-      navigate('/');
-      setTimeout(() => {
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }, 120);
-    }
+    navigateToPage('home', id);
+  };
+
+  const handlePageSelect = (e, page) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+    navigateToPage(page);
   };
 
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="container nav-container">
-        <Link to="/" className="logo">
+        <a href="/" className="logo" onClick={(e) => handleHomeSection(e, 'home')}>
           <img src="/logo.png" alt="Logo Trường THCS Lê Anh Xuân" className="school-logo-img" />
           <span>Trường THCS Lê Anh Xuân</span>
-        </Link>
+        </a>
 
         <div className="nav-links">
-          <a href="#home" onClick={(e) => handleSectionLink(e, 'home')}>Trang chủ</a>
-          <a href="#timeline" onClick={(e) => handleSectionLink(e, 'timeline')}>Tiểu sử</a>
-          <a href="#quotes" onClick={(e) => handleSectionLink(e, 'quotes')}>Lời dạy</a>
-          <a href="#gallery" onClick={(e) => handleSectionLink(e, 'gallery')}>Tư liệu</a>
-          <Link to="/goc-sang-tao" className={location.pathname === '/goc-sang-tao' ? 'active' : ''}>
+          <a href="#home" onClick={(e) => handleHomeSection(e, 'home')}>Trang chủ</a>
+          <a href="#timeline" onClick={(e) => handleHomeSection(e, 'timeline')}>Tiểu sử</a>
+          <a href="#quotes" onClick={(e) => handleHomeSection(e, 'quotes')}>Lời dạy</a>
+          <a href="#gallery" onClick={(e) => handleHomeSection(e, 'gallery')}>Tư liệu</a>
+          <a
+            href="#goc-sang-tao"
+            className={activePage === 'creative' ? 'active' : ''}
+            onClick={(e) => handlePageSelect(e, 'creative')}
+          >
             Góc sáng tạo
-          </Link>
-          <Link to="/khao-sat" className={location.pathname === '/khao-sat' ? 'active' : ''}>
+          </a>
+          <a
+            href="#khao-sat"
+            className={activePage === 'survey' ? 'active' : ''}
+            onClick={(e) => handlePageSelect(e, 'survey')}
+          >
             Khảo sát
-          </Link>
+          </a>
         </div>
 
         <button
@@ -61,12 +68,12 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
-        <a href="#home" onClick={(e) => handleSectionLink(e, 'home')}>Trang chủ</a>
-        <a href="#timeline" onClick={(e) => handleSectionLink(e, 'timeline')}>Tiểu sử</a>
-        <a href="#quotes" onClick={(e) => handleSectionLink(e, 'quotes')}>Lời dạy</a>
-        <a href="#gallery" onClick={(e) => handleSectionLink(e, 'gallery')}>Tư liệu</a>
-        <Link to="/goc-sang-tao" onClick={() => setIsMobileMenuOpen(false)}>Góc sáng tạo</Link>
-        <Link to="/khao-sat" onClick={() => setIsMobileMenuOpen(false)}>Khảo sát</Link>
+        <a href="#home" onClick={(e) => handleHomeSection(e, 'home')}>Trang chủ</a>
+        <a href="#timeline" onClick={(e) => handleHomeSection(e, 'timeline')}>Tiểu sử</a>
+        <a href="#quotes" onClick={(e) => handleHomeSection(e, 'quotes')}>Lời dạy</a>
+        <a href="#gallery" onClick={(e) => handleHomeSection(e, 'gallery')}>Tư liệu</a>
+        <a href="#goc-sang-tao" onClick={(e) => handlePageSelect(e, 'creative')}>Góc sáng tạo</a>
+        <a href="#khao-sat" onClick={(e) => handlePageSelect(e, 'survey')}>Khảo sát</a>
       </div>
     </nav>
   );

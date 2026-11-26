@@ -1,22 +1,7 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleSectionLink = (e, id) => {
-    if (location.pathname !== '/') {
-      e.preventDefault();
-      navigate('/');
-      setTimeout(() => {
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }, 120);
-    }
-  };
-
   return (
     <footer className="footer">
       <div className="container">
@@ -29,17 +14,7 @@ const Footer = () => {
             <h3>KHÔNG GIAN VĂN HÓA<br /><span className="text-gold">HỒ CHÍ MINH</span></h3>
           </div>
 
-          <div className="footer-links">
-            <h4>Liên kết</h4>
-            <ul>
-              <li><a href="#home" onClick={(e) => handleSectionLink(e, 'home')}>Trang chủ</a></li>
-              <li><a href="#timeline" onClick={(e) => handleSectionLink(e, 'timeline')}>Tiểu sử</a></li>
-              <li><a href="#quotes" onClick={(e) => handleSectionLink(e, 'quotes')}>Lời dạy</a></li>
-              <li><a href="#gallery" onClick={(e) => handleSectionLink(e, 'gallery')}>Tư liệu</a></li>
-              <li><Link to="/goc-sang-tao">Góc sáng tạo</Link></li>
-              <li><Link to="/khao-sat">Khảo sát</Link></li>
-            </ul>
-          </div>
+          <div className="footer-spacer" aria-hidden="true"></div>
 
           <div className="footer-info">
             <h4>Thông tin</h4>

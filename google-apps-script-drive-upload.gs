@@ -36,7 +36,7 @@ function doPost(e) {
     const isVideo = mimeType.indexOf('video/') === 0;
     const mediaUrl = isVideo
       ? 'https://drive.google.com/file/d/' + fileId + '/preview'
-      : 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1600';
+      : 'https://lh3.googleusercontent.com/d/' + fileId + '=w1600';
 
     return jsonResponse({
       success: true,
