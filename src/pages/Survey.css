@@ -4,7 +4,7 @@
 }
 
 .survey-header {
-  max-width: 860px;
+  max-width: 980px;
   margin: 0 auto 38px;
 }
 
@@ -13,6 +13,7 @@
   font-family: var(--font-serif);
   font-style: italic;
   font-size: 1.06rem;
+  text-wrap: balance;
 }
 
 /* Top 50 Leaderboard */
