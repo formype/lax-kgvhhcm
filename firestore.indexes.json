@@ -9,6 +9,14 @@
       ]
     },
     {
+      "collectionGroup": "creative_items",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "is_approved", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "survey_results",
       "queryScope": "COLLECTION",
       "fields": [

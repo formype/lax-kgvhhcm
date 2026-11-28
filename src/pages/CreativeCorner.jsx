@@ -14,6 +14,7 @@ import {
 import {
   collection,
   query,
+  where,
   orderBy,
   onSnapshot,
   addDoc,
@@ -22,6 +23,7 @@ import {
 import Ambient3DBackground from '../components/Ambient3DBackground';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import VideoPlayerModal from '../components/VideoPlayerModal';
 import { db } from '../lib/firebase';
 import './CreativeCorner.css';
 
@@ -64,9 +66,14 @@ function buildRenamedFileName(originalName, userName, role, className) {
   return `${cleanUser || 'Nguoi_dung'}_${cleanRole}${cleanClass}_${stamp}.${ext}`;
 }
 
-function fileToBase64(file) {
+function fileToBase64(file, onReadProgress) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
+    reader.onprogress = (e) => {
+      if (e.lengthComputable && onReadProgress) {
+        onReadProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
     reader.onload = () => {
       const result = String(reader.result || '');
       const base64 = result.includes(',') ? result.split(',')[1] : result;
@@ -75,6 +82,58 @@ function fileToBase64(file) {
     reader.onerror = () => reject(new Error('Không thể đọc tệp từ máy của bạn.'));
     reader.readAsDataURL(file);
   });
+}
+
+async function uploadToDriveWithProgress(url, payload, onUploadProgress) {
+  const jsonBody = JSON.stringify(payload);
+
+  // Check Google Apps Script ~50MB POST payload limit before sending
+  if (jsonBody.length > 48 * 1024 * 1024) {
+    throw new Error(
+      'Tệp vượt quá giới hạn truyền tải của Google Apps Script (~35 MB thực tế). Vui lòng nén nhỏ tệp hơn trước khi tải lên.'
+    );
+  }
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      xhr.setRequestHeader('Content-Type', 'text/plain;charset=utf-8');
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable && onUploadProgress) {
+          onUploadProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            resolve(JSON.parse(xhr.responseText));
+          } catch {
+            reject(new Error('Phản hồi từ Google Drive không hợp lệ.'));
+          }
+        } else {
+          reject(new Error(`Lỗi máy chủ Google Drive (${xhr.status}).`));
+        }
+      };
+
+      xhr.onerror = () => reject(new Error('XHR_NETWORK_ERROR'));
+      xhr.send(jsonBody);
+    });
+  } catch (err) {
+    if (err.message !== 'XHR_NETWORK_ERROR') throw err;
+
+    // Fallback to fetch if XHR hits a redirect/CORS quirk with Apps Script
+    if (onUploadProgress) onUploadProgress(85);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: jsonBody
+    });
+    if (onUploadProgress) onUploadProgress(100);
+    return res.json();
+  }
 }
 
 function formatDate(createdAt) {
@@ -104,6 +163,8 @@ function CreativeCorner() {
   const [previewUrl, setPreviewUrl] = useState('');
 
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStage, setUploadStage] = useState('');
   const [isFormExpanded, setIsFormExpanded] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -111,7 +172,11 @@ function CreativeCorner() {
   const gdriveUploadUrl = import.meta.env.VITE_GDRIVE_UPLOAD_URL;
 
   useEffect(() => {
-    const q = query(collection(db, 'creative_items'), orderBy('created_at', 'desc'));
+    const q = query(
+      collection(db, 'creative_items'),
+      where('is_approved', '==', true),
+      orderBy('created_at', 'desc')
+    );
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -212,28 +277,38 @@ function CreativeCorner() {
     }
 
     setIsUploading(true);
+    setUploadProgress(2);
+    setUploadStage('Đang chuẩn bị tệp...');
 
     try {
       const renamedFileName = buildRenamedFileName(file.name, trimmedName, role, trimmedClass);
-      const base64Data = await fileToBase64(file);
+      const base64Data = await fileToBase64(file, (pct) => {
+        setUploadProgress(Math.max(2, Math.round(pct * 0.1)));
+      });
 
-      const response = await fetch(gdriveUploadUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8'
-        },
-        body: JSON.stringify({
+      setUploadStage('Đang tải lên Google Drive...');
+      const data = await uploadToDriveWithProgress(
+        gdriveUploadUrl,
+        {
           fileName: renamedFileName,
           mimeType: file.type,
           base64Data
-        })
-      });
+        },
+        (pct) => {
+          // Map XHR upload 0..100% into overall 10..92%
+          setUploadProgress(10 + Math.round(pct * 0.82));
+          if (pct >= 100) {
+            setUploadStage('Đang xử lý lưu trên Google Drive...');
+          }
+        }
+      );
 
-      const data = await response.json();
       if (!data?.success || !data?.fileId || !data?.mediaUrl) {
         throw new Error(data?.error || 'Không thể tải tệp lên Google Drive.');
       }
 
+      setUploadProgress(95);
+      setUploadStage('Đang lưu thông tin tác phẩm...');
       const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
 
       await addDoc(collection(db, 'creative_items'), {
@@ -246,13 +321,13 @@ function CreativeCorner() {
         media_url: data.mediaUrl,
         drive_file_id: data.fileId,
         file_name: data.fileName || renamedFileName,
+        is_approved: false,
         created_at: serverTimestamp()
       });
 
+      setUploadProgress(100);
       setSuccessMsg(
-        `Đã tải lên thành công tác phẩm "${trimmedTitle}" (tệp lưu trên Drive: ${
-          data.fileName || renamedFileName
-        }).`
+        `Đã gửi thành công tác phẩm "${trimmedTitle}". Tác phẩm của bạn đã được ghi nhận và đang chờ quản trị viên phê duyệt để hiển thị.`
       );
       setTitle('');
       setDescription('');
@@ -264,6 +339,8 @@ function CreativeCorner() {
       setErrorMsg('Lỗi tải lên: ' + err.message);
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
+      setUploadStage('');
     }
   };
 
@@ -473,8 +550,23 @@ function CreativeCorner() {
                   </div>
                 )}
 
+                {isUploading && (
+                  <div className="upload-progress-wrap" aria-live="polite">
+                    <div className="upload-progress-header">
+                      <span>{uploadStage || 'Đang tải lên...'}</span>
+                      <strong>{uploadProgress}%</strong>
+                    </div>
+                    <div className="upload-progress-track">
+                      <div
+                        className="upload-progress-fill"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <button type="submit" className="btn btn-gold creative-submit-btn" disabled={isUploading}>
-                  {isUploading ? 'Đang tải lên Google Drive...' : (
+                  {isUploading ? `Đang tải lên... (${uploadProgress}%)` : (
                     <>
                       <Upload size={17} /> Tải tác phẩm lên Góc sáng tạo
                     </>
@@ -523,13 +615,30 @@ function CreativeCorner() {
                   <article key={item.id} className="creative-item-card glass">
                     <div className="creative-media-wrap">
                       {item.media_type === 'video' ? (
-                        <iframe
-                          src={item.media_url}
-                          title={item.title}
-                          className="creative-video-frame"
-                          allow="autoplay; fullscreen"
-                          allowFullScreen
-                        />
+                        <div
+                          className="creative-video-thumb-btn"
+                          onClick={() => setSelectedItem(item)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') setSelectedItem(item);
+                          }}
+                        >
+                          <img
+                            src={getImageDisplayUrl(item)}
+                            alt={item.title}
+                            className="creative-image-thumb"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                            loading="lazy"
+                          />
+                          <div className="creative-video-play-overlay">
+                            <div className="creative-video-play-circle">▶</div>
+                            <span>Nhấn để xem video</span>
+                          </div>
+                        </div>
                       ) : (
                         <img
                           src={getImageDisplayUrl(item)}
@@ -578,9 +687,15 @@ function CreativeCorner() {
         </div>
       </main>
 
-      {/* Lightbox xem ảnh phóng to */}
+      {/* Lightbox xem ảnh phóng to / Trình phát video kiểu YouTube */}
       <AnimatePresence>
-        {selectedItem && (
+        {selectedItem && selectedItem.media_type === 'video' && (
+          <VideoPlayerModal
+            item={selectedItem}
+            onClose={() => setSelectedItem(null)}
+          />
+        )}
+        {selectedItem && selectedItem.media_type !== 'video' && (
           <motion.div
             className="creative-lightbox-backdrop"
             initial={{ opacity: 0 }}

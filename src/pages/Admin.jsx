@@ -32,7 +32,8 @@ function Admin() {
 
   const [reflections, setReflections] = useState([]);
   const [creativeItems, setCreativeItems] = useState([]);
-  const [activeTab, setActiveTab] = useState('pending');
+  const [activeSection, setActiveSection] = useState('reflections'); // 'reflections' | 'creative'
+  const [activeStatus, setActiveStatus] = useState('pending'); // 'pending' | 'approved'
 
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -124,10 +125,42 @@ function Admin() {
     }
   };
 
-  const deleteCreativeItem = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa tác phẩm này khỏi Góc sáng tạo?')) {
+  const toggleCreativeApproval = async (id, currentStatus) => {
+    try {
+      await updateDoc(doc(db, 'creative_items', id), {
+        is_approved: !currentStatus
+      });
+    } catch (err) {
+      alert('Lỗi cập nhật: ' + err.message);
+    }
+  };
+
+  const deleteCreativeItem = async (item) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa tác phẩm này khỏi Góc sáng tạo và Google Drive?')) {
       try {
-        await deleteDoc(doc(db, 'creative_items', id));
+        const gdriveUrl = import.meta.env.VITE_GDRIVE_UPLOAD_URL;
+        if (gdriveUrl && item.drive_file_id) {
+          const res = await fetch(gdriveUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'delete',
+              fileId: item.drive_file_id
+            })
+          });
+          const data = await res.json();
+          if (!data?.success) {
+            const detail = data?.error || 'Không rõ lỗi từ Google Apps Script.';
+            const hint = detail.includes('Thiếu dữ liệu tệp tải lên')
+              ? '\n\n(Gợi ý: Bạn cần vào script.google.com, dán code mới nhất và chọn Triển khai -> Quản lý các bản triển khai -> Sửa -> Phiên bản mới).'
+              : '';
+            const forceDelete = window.confirm(
+              `Không thể xóa tệp trên Google Drive (${detail}).${hint}\n\nBạn vẫn muốn xóa bài khỏi trang web chứ?`
+            );
+            if (!forceDelete) return;
+          }
+        }
+        await deleteDoc(doc(db, 'creative_items', item.id));
       } catch (err) {
         alert('Lỗi xóa: ' + err.message);
       }
@@ -173,7 +206,11 @@ function Admin() {
 
   const pendingReflections = reflections.filter((r) => !r.is_approved);
   const approvedReflections = reflections.filter((r) => r.is_approved);
-  const displayList = activeTab === 'pending' ? pendingReflections : approvedReflections;
+  const pendingCreative = creativeItems.filter((c) => !c.is_approved);
+  const approvedCreative = creativeItems.filter((c) => c.is_approved);
+
+  const displayReflections = activeStatus === 'pending' ? pendingReflections : approvedReflections;
+  const displayCreative = activeStatus === 'pending' ? pendingCreative : approvedCreative;
 
   return (
     <div className="admin-dashboard">
@@ -189,33 +226,48 @@ function Admin() {
       </header>
 
       <main className="admin-main">
-        <div className="admin-tabs">
+        {/* Chọn phân hệ quản trị */}
+        <div className="admin-section-switcher">
           <button
-            className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pending')}
+            className={`section-switch-btn ${activeSection === 'reflections' ? 'active' : ''}`}
+            onClick={() => setActiveSection('reflections')}
           >
-            Chờ duyệt ({pendingReflections.length})
+            Cảm nhận &amp; Lời hứa ({pendingReflections.length} chờ duyệt)
           </button>
           <button
-            className={`tab-btn ${activeTab === 'approved' ? 'active' : ''}`}
-            onClick={() => setActiveTab('approved')}
+            className={`section-switch-btn ${activeSection === 'creative' ? 'active' : ''}`}
+            onClick={() => setActiveSection('creative')}
           >
-            Đã duyệt ({approvedReflections.length})
-          </button>
-          <button
-            className={`tab-btn ${activeTab === 'creative' ? 'active' : ''}`}
-            onClick={() => setActiveTab('creative')}
-          >
-            Góc sáng tạo ({creativeItems.length})
+            Góc sáng tạo ({pendingCreative.length} chờ duyệt)
           </button>
         </div>
 
-        {activeTab === 'creative' ? (
+        {/* Phân chia rõ ràng Chờ duyệt / Đã duyệt */}
+        <div className="admin-tabs">
+          <button
+            className={`tab-btn ${activeStatus === 'pending' ? 'active' : ''}`}
+            onClick={() => setActiveStatus('pending')}
+          >
+            Chờ duyệt ({activeSection === 'reflections' ? pendingReflections.length : pendingCreative.length})
+          </button>
+          <button
+            className={`tab-btn ${activeStatus === 'approved' ? 'active' : ''}`}
+            onClick={() => setActiveStatus('approved')}
+          >
+            Đã duyệt ({activeSection === 'reflections' ? approvedReflections.length : approvedCreative.length})
+          </button>
+        </div>
+
+        {activeSection === 'creative' ? (
           <div className="admin-list">
-            {creativeItems.length === 0 ? (
-              <div className="empty-state">Chưa có tác phẩm nào trong Góc sáng tạo.</div>
+            {displayCreative.length === 0 ? (
+              <div className="empty-state">
+                {activeStatus === 'pending'
+                  ? 'Không có tác phẩm nào đang chờ duyệt.'
+                  : 'Chưa có tác phẩm nào được duyệt.'}
+              </div>
             ) : (
-              creativeItems.map((item) => (
+              displayCreative.map((item) => (
                 <div key={item.id} className="admin-card">
                   <div className="admin-card-header">
                     <div className="admin-card-info">
@@ -225,13 +277,36 @@ function Admin() {
                       <span className="date">{formatDateTime(item.created_at)}</span>
                     </div>
                     <div className="admin-card-actions">
-                      <button onClick={() => deleteCreativeItem(item.id)} className="action-btn danger" title="Xóa khỏi Góc sáng tạo">
+                      {item.is_approved ? (
+                        <button onClick={() => toggleCreativeApproval(item.id, item.is_approved)} className="action-btn warning" title="Ẩn tác phẩm này">
+                          <EyeOff size={16} /> Ẩn
+                        </button>
+                      ) : (
+                        <button onClick={() => toggleCreativeApproval(item.id, item.is_approved)} className="action-btn success" title="Duyệt cho phép hiển thị">
+                          <CheckCircle size={16} /> Duyệt
+                        </button>
+                      )}
+                      <button onClick={() => deleteCreativeItem(item)} className="action-btn danger" title="Xóa khỏi Góc sáng tạo và Google Drive">
                         <Trash2 size={16} /> Xóa
                       </button>
                     </div>
                   </div>
                   <div className="admin-card-body">
-                    <div>Tệp Drive: <code>{item.file_name}</code></div>
+                    <div>
+                      Tệp Drive: <code>{item.file_name}</code> —{' '}
+                      <a
+                        href={
+                          item.drive_file_id
+                            ? `https://drive.google.com/file/d/${item.drive_file_id}/view`
+                            : item.media_url
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: 'var(--accent-gold-light)', textDecoration: 'underline' }}
+                      >
+                        Xem tệp
+                      </a>
+                    </div>
                     {item.description && <div style={{ marginTop: 6 }}>{item.description}</div>}
                   </div>
                 </div>
@@ -240,10 +315,14 @@ function Admin() {
           </div>
         ) : (
           <div className="admin-list">
-          {displayList.length === 0 ? (
-            <div className="empty-state">Không có dữ liệu trong danh mục này.</div>
-          ) : (
-            displayList.map((item) => (
+            {displayReflections.length === 0 ? (
+              <div className="empty-state">
+                {activeStatus === 'pending'
+                  ? 'Không có cảm nhận nào đang chờ duyệt.'
+                  : 'Chưa có cảm nhận nào được duyệt.'}
+              </div>
+            ) : (
+              displayReflections.map((item) => (
               <div key={item.id} className="admin-card">
                 <div className="admin-card-header">
                   <div className="admin-card-info">

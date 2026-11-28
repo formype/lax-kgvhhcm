@@ -123,6 +123,37 @@
   margin: 0 auto;
 }
 
+.admin-section-switcher {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.section-switch-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.section-switch-btn:hover {
+  border-color: var(--accent-gold);
+  color: var(--text-primary);
+}
+
+.section-switch-btn.active {
+  background: linear-gradient(135deg, var(--primary-red) 0%, #5c0c10 100%);
+  border-color: var(--accent-gold-light);
+  color: var(--accent-gold-light);
+  box-shadow: 0 4px 16px rgba(139, 21, 27, 0.45);
+}
+
 .admin-tabs {
   display: flex;
   gap: 15px;

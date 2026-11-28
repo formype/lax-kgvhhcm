@@ -43,6 +43,7 @@ service cloud.firestore {
     //   - media_url: string (required, 10..1000 chars, starts with 'https://')
     //   - drive_file_id: string (required, 5..150 chars, trimmed non-empty)
     //   - file_name: string (required, 1..255 chars, trimmed non-empty)
+    //   - is_approved: bool (required, must be false on create; only mutable field by Admin)
     //   - created_at: timestamp (required, must equal request.time on create)
     //
     // ===============================================================
@@ -127,8 +128,8 @@ service cloud.firestore {
     }
 
     function isValidCreativeItem(data) {
-      return hasOnlyAllowedFields(data, ['name', 'role', 'class_name', 'title', 'description', 'media_type', 'media_url', 'drive_file_id', 'file_name', 'created_at']) &&
-             hasRequiredFields(data, ['name', 'role', 'title', 'media_type', 'media_url', 'drive_file_id', 'file_name', 'created_at']) &&
+      return hasOnlyAllowedFields(data, ['name', 'role', 'class_name', 'title', 'description', 'media_type', 'media_url', 'drive_file_id', 'file_name', 'is_approved', 'created_at']) &&
+             hasRequiredFields(data, ['name', 'role', 'title', 'media_type', 'media_url', 'drive_file_id', 'file_name', 'is_approved', 'created_at']) &&
              isValidNonEmptyString(data.name, 1, 120) &&
              data.role is string &&
              data.role in ['Giáo viên', 'Học sinh'] &&
@@ -143,6 +144,7 @@ service cloud.firestore {
              data.media_url.matches('^https://.*') &&
              isValidNonEmptyString(data.drive_file_id, 5, 150) &&
              isValidNonEmptyString(data.file_name, 1, 255) &&
+             data.is_approved is bool &&
              data.created_at is timestamp;
     }
 
@@ -187,17 +189,21 @@ service cloud.firestore {
     }
 
     // Creative Corner showcase items:
-    // - Public can read (get, list) so visitors can view uploaded images and watch videos.
-    // - Public can create entries with strict schema, type/range checks, and server timestamp.
-    // - Updates are denied for everyone (creative items are immutable).
+    // - Public can read (get, list) only approved entries; Admin can read all entries.
+    // - Public can create unapproved entries with strict schema, type/range checks, and server timestamp.
+    // - Admin can update only is_approved (bool), preserving all other fields.
     // - Admin can delete entries.
     match /creative_items/{itemId} {
-      allow read: if true;
+      allow read: if isAuthenticated() || resource.data.is_approved == true;
 
       allow create: if isValidCreativeItem(request.resource.data) &&
+                       request.resource.data.is_approved == false &&
                        request.resource.data.created_at == request.time;
 
-      allow update: if false;
+      allow update: if isAuthenticated() &&
+                       isValidCreativeItem(request.resource.data) &&
+                       onlyChangedFields(['is_approved']) &&
+                       request.resource.data.is_approved is bool;
 
       allow delete: if isAuthenticated();
     }
