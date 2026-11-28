@@ -58,17 +58,16 @@ const Gallery = () => {
           <div className="quotes-grid">
             {quotes.map((quote, index) => (
               <motion.div
+                className="quote-card glass"
                 key={index}
                 initial={{ opacity: 0, scale: 0.94 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.15 }}
               >
-                <Tilt3DCard className="quote-card glass" maxTilt={6} scale={1.02}>
-                  <Quote className="quote-icon" size={40} style={{ transform: 'translateZ(20px)' }} />
-                  <p className="quote-text" style={{ transform: 'translateZ(28px)' }}>{quote.text}</p>
-                  <p className="quote-source" style={{ transform: 'translateZ(18px)' }}>- {quote.source} -</p>
-                </Tilt3DCard>
+                <Quote className="quote-icon" size={40} />
+                <p className="quote-text">{quote.text}</p>
+                <p className="quote-source">- {quote.source} -</p>
               </motion.div>
             ))}
           </div>
